@@ -1,4 +1,5 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -11,10 +12,25 @@ var sender = new gcm.Sender(API_KEY);
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
 var pairs = {};
 
+app.use(bodyParser.json())
 app.use(express.static(__dirname + '/public'));
 
 app.post('/pair', function (req, res) {
-	// TODO: if token exists, add registration_id to pairs[token]
+	var token = req.body.registration_id;
+	var registration_id = req.body.registration_id;
+
+	if (pair[token] === undefined) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_INVALID_TOKEN'
+		});
+		return;
+	}
+
+	pairs[token].registration_id = registration_id;
+	res.json({
+		'status' : 'success'
+	});
 });
 
 app.post('/unpair', function (req, res) {
@@ -37,7 +53,7 @@ io.on('connection', function (socket) {
 		var registration_id = pairs[socket.token].registration_id;
 
 		if (registration_id === undefined) {
-			socket.emit('error', 'E_SOCKET_NOT_PAIRED');
+			socket.emit('fail', 'E_SOCKET_NOT_PAIRED');
 			return;
 		}
 
@@ -77,7 +93,7 @@ http.listen(port, function () {
 
 function generateToken() {
 	do {
-		var token = Math.random().toString(36).substr(2);
+		var token = 'QRSYNC' + Math.random().toString(36).substr(2);
 	} while (pairs[token] !== undefined);
 	return token;
 }

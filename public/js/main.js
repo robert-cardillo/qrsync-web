@@ -1,7 +1,5 @@
-var socket;
-
 $(document).ready(function () {
-	socket = io('//:8000');
+	var socket = io('//:8000');
 	socket.on('qr', function (data) {
 		$('#qrcode').html('');
 		var qrcode = new QRCode('qrcode', {
@@ -14,6 +12,9 @@ $(document).ready(function () {
 			});
 	});
 	socket.on('data', function (data) {
+		console.log(data);
+	});
+	socket.on('fail', function (data) {
 		console.log(data);
 	});
 	window.onbeforeunload = function (e) {

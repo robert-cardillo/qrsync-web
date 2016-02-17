@@ -2,12 +2,20 @@
 <html>
 	<head>
 		<title>QRSync</title>
+		<style>
+			.content {
+				width: 256px;
+				margin: 100px auto;
+			}
+		</style>
 	</head>
 	<body>
-		<div id="qrcode"></div>
+		<div class="content">
+			<div id="qrcode"></div>
+		</div>
 		<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-		<script src="js/qrcode.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
+		<script src="js/qrcode.min.js"></script>
 		<script src="js/main.js"></script>
 	</body>
 </html>
