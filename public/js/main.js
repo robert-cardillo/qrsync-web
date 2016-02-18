@@ -1,4 +1,12 @@
 $(document).ready(function () {
+	$('#send').hide();
+	$('#sendBtn').click(function(){
+		data = $('#data').val();
+		if(data.length > 0){
+			socket.emit('send', data);
+		}
+	});
+	
 	var socket = io('//:8000');
 	socket.on('qr', function (data) {
 		$('#qrcode').html('');
@@ -13,6 +21,8 @@ $(document).ready(function () {
 	});
 	socket.on('pair', function () {
 		console.log('PAIRED');
+		$('#qrcode').hide();
+		$('#send').show();
 	});
 	socket.on('data', function (data) {
 		console.log('DATA: ' + data);

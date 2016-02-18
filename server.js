@@ -39,6 +39,8 @@ app.post('/pair', function (req, res) {
 	res.json({
 		'status' : 'success'
 	});
+	
+	pairs[token].socket.emit('pair');
 });
 
 app.post('/unpair', function (req, res) {
