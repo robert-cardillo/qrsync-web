@@ -11,11 +11,18 @@ $(document).ready(function () {
 				correctLevel : QRCode.CorrectLevel.H
 			});
 	});
+	socket.on('pair', function () {
+		console.log('PAIRED');
+	});
 	socket.on('data', function (data) {
-		console.log(data);
+		console.log('DATA: ' + data);
 	});
 	socket.on('fail', function (data) {
-		console.log(data);
+		console.log('ERR: ' + data);
+	});
+	socket.on('disconnect', function () {
+		// TODO: notify user about disconnection, disable form
+		console.log('DISCONNECTED');
 	});
 	window.onbeforeunload = function (e) {
 		socket.disconnect();

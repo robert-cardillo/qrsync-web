@@ -52,7 +52,7 @@ app.post('/unpair', function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (pairs[token].registration_id !== registration_id) {
 		res.json({
 			'status' : 'fail',
@@ -60,9 +60,8 @@ app.post('/unpair', function (req, res) {
 		});
 		return;
 	}
-	
+
 	var socket = pairs[token].socket;
-	// TODO: Test if disconnected event is triggered from client side
 	socket.disconnect();
 	delete pairs[token];
 	delete socket.token;
@@ -80,7 +79,7 @@ app.post('/send', function (req, res) {
 		});
 		return;
 	}
-	
+
 	if (pairs[token].registration_id !== registration_id) {
 		res.json({
 			'status' : 'fail',
@@ -88,7 +87,7 @@ app.post('/send', function (req, res) {
 		});
 		return;
 	}
-	
+
 	socket.emit('data', data);
 });
 
@@ -115,17 +114,21 @@ io.on('connection', function (socket) {
 			if (err)
 				socket.emit('fail', err);
 		});
-
 	});
 
 	socket.on('disconnect', function () {
 		var token = socket.token;
-		sendGCM(token, {
-			'do' : 'unpair'
-		}, function (err, response) {
+		if (pairs[token].registration_id !== undefined) {
+			sendGCM(token, {
+				'do' : 'unpair'
+			}, function (err, response) {
+				delete pairs[token];
+				delete socket.token;
+			});
+		} else {
 			delete pairs[token];
 			delete socket.token;
-		});
+		}
 	});
 });
 
