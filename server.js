@@ -27,6 +27,14 @@ app.post('/pair', function (req, res) {
 		return;
 	}
 
+	if (pair[token].registration_id !== undefined) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_TOKEN_ALREADY_PAIRED'
+		});
+		return;
+	}
+
 	pairs[token].registration_id = registration_id;
 	res.json({
 		'status' : 'success'
@@ -50,40 +58,31 @@ io.on('connection', function (socket) {
 	socket.emit('qr', token);
 
 	socket.on('send', function (data) {
-		var registration_id = pairs[socket.token].registration_id;
+		var token = socket.token;
+		var registration_id = pairs[token].registration_id;
 
 		if (registration_id === undefined) {
 			socket.emit('fail', 'E_SOCKET_NOT_PAIRED');
 			return;
 		}
 
-		var message = new gcm.Message({
-				'priority' : 'high',
-				'data' : {
-					'message' : data
-				}
-			});
-
-		sender.send(message, {
-			registrationTokens : [registration_id]
+		sendGCM(token, {
+			'message' : data
 		}, function (err, response) {
-			if (err) {
-				console.error(err);
-			} else {
-				if (response.canonical_ids > 0) {
-					pairs[socket.token].registration_id = response.results[0].registration_id;
-				}
-			}
+			if (err)
+				socket.emit('fail', err);
 		});
 
 	});
 
 	socket.on('disconnect', function () {
 		var token = socket.token;
-		var registration_id = pairs[token].registration_id;
-		delete pairs[token];
-		delete socket['token'];
-		// TODO: push unpair event to registration_id
+		sendGCM(token, {
+			'do' : 'unpair'
+		}, function (err, response) {
+			delete pairs[token];
+			delete socket.token;
+		});
 	});
 });
 
@@ -96,4 +95,25 @@ function generateToken() {
 		var token = 'QRSYNC' + Math.random().toString(36).substr(2);
 	} while (pairs[token] !== undefined);
 	return token;
+}
+
+function sendGCM(token, data, callback) {
+	var registration_id = pairs[token].registration_id;
+	var message = new gcm.Message({
+			'priority' : 'high',
+			'data' : data
+		});
+
+	sender.send(message, {
+		registrationTokens : [registration_id]
+	}, function (err, response) {
+		if (err) {
+			console.error(err);
+		} else {
+			if (response.canonical_ids > 0) {
+				pairs[token].registration_id = response.results[0].registration_id;
+			}
+		}
+		callback(err, response);
+	});
 }
