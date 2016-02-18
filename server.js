@@ -19,7 +19,7 @@ app.post('/pair', function (req, res) {
 	var token = req.body.token;
 	var registration_id = req.body.registration_id;
 
-	if (pair[token] === undefined) {
+	if (pairs[token] === undefined) {
 		res.json({
 			'status' : 'fail',
 			'error' : 'E_INVALID_TOKEN'
@@ -27,7 +27,7 @@ app.post('/pair', function (req, res) {
 		return;
 	}
 
-	if (pair[token].registration_id !== undefined) {
+	if (pairs[token].registration_id !== undefined) {
 		res.json({
 			'status' : 'fail',
 			'error' : 'E_TOKEN_ALREADY_PAIRED'
@@ -42,11 +42,54 @@ app.post('/pair', function (req, res) {
 });
 
 app.post('/unpair', function (req, res) {
-	// TODO: unpair socket and registration_id
+	var token = req.body.token;
+	var registration_id = req.body.registration_id;
+
+	if (pairs[token] === undefined) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_INVALID_TOKEN'
+		});
+		return;
+	}
+	
+	if (pairs[token].registration_id !== registration_id) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_MISSMATCHED_REGID'
+		});
+		return;
+	}
+	
+	var socket = pairs[token].socket;
+	// TODO: Test if disconnected event is triggered from client side
+	socket.disconnect();
+	delete pairs[token];
+	delete socket.token;
 });
 
 app.post('/send', function (req, res) {
-	// TODO: send received data to pairs[token].socket
+	var token = req.body.token;
+	var registration_id = req.body.registration_id;
+	var data = req.body.data;
+
+	if (pairs[token] === undefined) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_INVALID_TOKEN'
+		});
+		return;
+	}
+	
+	if (pairs[token].registration_id !== registration_id) {
+		res.json({
+			'status' : 'fail',
+			'error' : 'E_MISSMATCHED_REGID'
+		});
+		return;
+	}
+	
+	socket.emit('data', data);
 });
 
 io.on('connection', function (socket) {
