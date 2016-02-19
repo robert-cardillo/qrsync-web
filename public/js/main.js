@@ -1,12 +1,16 @@
 $(document).ready(function () {
-	$('#send').hide();
-	$('#sendBtn').click(function(){
-		data = $('#data').val();
-		if(data.length > 0){
+	var URLpattern = new RegExp('^https?:\/\/.*');
+
+	//$('#send').hide();
+	$('#sendForm').submit(function (e) {
+		e.preventDefault();
+		var data = $('#data').val();
+		if (data.length > 0) {
 			socket.emit('send', data);
+			$('#data').val('').focus();
 		}
 	});
-	
+
 	var socket = io('//:8000');
 	socket.on('qr', function (data) {
 		$('#qrcode').html('');
@@ -25,13 +29,15 @@ $(document).ready(function () {
 		$('#send').show();
 	});
 	socket.on('data', function (data) {
-		console.log('DATA: ' + data);
+		if (URLpattern.test(data)) {
+			data = '<a href="'+data+'" target="_blank">'+data+'</a>'
+		}
+		$("#history").prepend($('<li>').html(data));
 	});
 	socket.on('fail', function (data) {
 		console.log('ERR: ' + data);
 	});
 	socket.on('disconnect', function () {
-		// TODO: notify user about disconnection, disable form
 		window.location.reload();
 	});
 	window.onbeforeunload = function (e) {
