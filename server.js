@@ -10,7 +10,7 @@ var gcm = require('node-gcm');
 var sender = new gcm.Sender(API_KEY);
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
-var ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var ip = process.env.OPENSHIFT_NODEJS_IP || '192.168.137.1';
 var pairs = {};
 
 app.use(bodyParser.json())
@@ -50,8 +50,7 @@ app.post('/unpair', function (req, res) {
 
 	if (pairs[token] === undefined) {
 		res.json({
-			'status' : 'fail',
-			'error' : 'E_INVALID_TOKEN'
+			'status' : 'success'
 		});
 		return;
 	}
@@ -82,7 +81,8 @@ app.post('/send', function (req, res) {
 
 	if (pairs[token] === undefined) {
 		res.json({
-			'status' : 'success'
+			'status' : 'fail',
+			'error' : 'E_INVALID_TOKEN'
 		});
 		return;
 	}
@@ -99,7 +99,7 @@ app.post('/send', function (req, res) {
 		'status' : 'success'
 	});
 
-	socket.emit('data', data);
+	pairs[token].socket.emit('data', data);
 });
 
 io.on('connection', function (socket) {
