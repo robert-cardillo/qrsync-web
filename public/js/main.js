@@ -32,7 +32,7 @@ $(document).ready(function () {
 	});
 	socket.on('disconnect', function () {
 		// TODO: notify user about disconnection, disable form
-		console.log('DISCONNECTED');
+		window.location.reload();
 	});
 	window.onbeforeunload = function (e) {
 		socket.disconnect();
