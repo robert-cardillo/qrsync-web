@@ -13,6 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+	"main": "server.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/snowy73/qrsync-web.git"

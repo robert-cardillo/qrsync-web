@@ -10,6 +10,7 @@ var gcm = require('node-gcm');
 var sender = new gcm.Sender(API_KEY);
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 var pairs = {};
 
 app.use(bodyParser.json())
@@ -39,7 +40,7 @@ app.post('/pair', function (req, res) {
 	res.json({
 		'status' : 'success'
 	});
-	
+
 	pairs[token].socket.emit('pair');
 });
 
@@ -134,9 +135,7 @@ io.on('connection', function (socket) {
 	});
 });
 
-http.listen(port, function () {
-	console.log('listening on *:' + port);
-});
+http.listen(port, ip);
 
 function generateToken() {
 	do {
