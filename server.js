@@ -65,9 +65,14 @@ app.post('/unpair', function (req, res) {
 	}
 
 	var socket = pairs[token].socket;
-	socket.disconnect();
 	delete pairs[token];
 	delete socket.token;
+	
+	res.json({
+		'status' : 'success'
+	});
+	
+	socket.disconnect();
 });
 
 app.post('/send', function (req, res) {
