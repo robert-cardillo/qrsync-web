@@ -128,7 +128,7 @@ io.on('connection', function (socket) {
 		var token = socket.token;
 		if (pairs[token].registration_id !== undefined) {
 			sendGCM(token, {
-				'do' : 'unpair'
+				'action' : 'unpair'
 			}, function (err, response) {
 				delete pairs[token];
 				delete socket.token;
