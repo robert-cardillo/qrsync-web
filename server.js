@@ -95,6 +95,10 @@ app.post('/send', function (req, res) {
 		});
 		return;
 	}
+	
+	res.json({
+		'status' : 'success'
+	});
 
 	socket.emit('data', data);
 });
