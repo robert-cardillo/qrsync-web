@@ -82,8 +82,7 @@ app.post('/send', function (req, res) {
 
 	if (pairs[token] === undefined) {
 		res.json({
-			'status' : 'fail',
-			'error' : 'E_INVALID_TOKEN'
+			'status' : 'success'
 		});
 		return;
 	}
