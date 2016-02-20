@@ -1,7 +1,7 @@
 $(document).ready(function () {
 	var URLpattern = new RegExp('^https?:\/\/.*');
 
-	//$('#send').hide();
+	$('#send').hide();
 	$('#sendForm').submit(function (e) {
 		e.preventDefault();
 		var data = $('#data').val();
