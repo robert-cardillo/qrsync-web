@@ -1,6 +1,4 @@
 $(document).ready(function () {
-	var URLpattern = new RegExp('^https?:\/\/.*');
-
 	$('#send').hide();
 	$('#sendForm').submit(function (e) {
 		e.preventDefault();
@@ -29,9 +27,8 @@ $(document).ready(function () {
 		$('#send').show();
 	});
 	socket.on('data', function (data) {
-		if (URLpattern.test(data)) {
-			data = '<a href="'+data+'" target="_blank">'+data+'</a>'
-		}
+		data = escapeHtml(data);
+		data = extractLinks(data);
 		$("#history").prepend($('<li>').html(data));
 	});
 	socket.on('fail', function (data) {
