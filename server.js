@@ -1,4 +1,5 @@
 var express = require('express');
+var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
@@ -13,7 +14,8 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
 var ip = process.env.OPENSHIFT_NODEJS_IP || '192.168.137.1';
 var pairs = {};
 
-app.use(bodyParser.json())
+app.use(cookieParser());
+app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
 app.post('/pair', function (req, res) {
@@ -106,6 +108,19 @@ app.post('/send', function (req, res) {
 			'status' : 'success',
 			'message' : 'Please open the webpage first!'
 		});
+	}
+});
+
+app.get('/s', function (req, res) {
+	var token = req.cookies.token;
+	var message = req.query.m;
+	if (message && pairs[token] && pairs[token].registration_id) {
+		sendGCM(token, {
+			'message' : message
+		}, function (err, response) {});
+		res.send("");
+	} else {
+		res.send("alert('QRSync: Please pair your device and your browser first.')");
 	}
 });
 
