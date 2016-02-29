@@ -20,6 +20,7 @@ $(document).ready(function () {
 				colorLight : '#ffffff',
 				correctLevel : QRCode.CorrectLevel.H
 			});
+		setCookie("token", data, 30);
 	});
 	socket.on('pair', function () {
 		console.log('PAIRED');
@@ -32,7 +33,7 @@ $(document).ready(function () {
 		$("#history").prepend($('<li>').html(data));
 	});
 	socket.on('fail', function (data) {
-		console.log('ERR: ' + data);
+		alert('ERROR: ' + data);
 	});
 	socket.on('disconnect', function () {
 		window.location.reload();
@@ -40,4 +41,6 @@ $(document).ready(function () {
 	window.onbeforeunload = function (e) {
 		socket.disconnect();
 	}
+	
+	socket.emit('try-remember', getCookie("token"));
 });

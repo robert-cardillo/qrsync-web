@@ -63,15 +63,15 @@ app.post('/unpair', function (req, res) {
 		return;
 	}
 
-	var socket = pairs[token].socket;
+	if (pairs[token].socket) {
+		delete pairs[token].socket.token;
+		pairs[token].socket.disconnect();
+	}
 	delete pairs[token];
-	delete socket.token;
-	
+
 	res.json({
 		'status' : 'success'
 	});
-	
-	socket.disconnect();
 });
 
 app.post('/send', function (req, res) {
@@ -94,21 +94,36 @@ app.post('/send', function (req, res) {
 		});
 		return;
 	}
-	
-	res.json({
-		'status' : 'success'
-	});
 
-	pairs[token].socket.emit('data', data);
+	if (pairs[token].socket) {
+		pairs[token].socket.emit('data', data);
+		res.json({
+			'status' : 'success',
+			'message' : 'Send successful'
+		});
+	} else {
+		res.json({
+			'status' : 'success',
+			'message' : 'Please open the webpage first!'
+		});
+	}
 });
 
 io.on('connection', function (socket) {
-	var token = generateToken();
-	pairs[token] = {
-		'socket' : socket
-	};
-	socket.token = token;
-	socket.emit('qr', token);
+	socket.on('try-remember', function (data) {
+		if (data && pairs[data] && pairs[data].registration_id && !pairs[data].socket) {
+			socket.token = data;
+			pairs[data].socket = socket;
+			socket.emit('pair');
+		} else {
+			var token = generateToken();
+			pairs[token] = {
+				'socket' : socket
+			};
+			socket.token = token;
+			socket.emit('qr', token);
+		}
+	});
 
 	socket.on('send', function (data) {
 		var token = socket.token;
@@ -129,13 +144,17 @@ io.on('connection', function (socket) {
 
 	socket.on('disconnect', function () {
 		var token = socket.token;
-		if (pairs[token].registration_id !== undefined) {
+		if (token && pairs[token] && pairs[token].registration_id !== undefined) {
+			/*
 			sendGCM(token, {
-				'action' : 'unpair'
+			'action' : 'unpair'
 			}, function (err, response) {
-				delete pairs[token];
-				delete socket.token;
+			delete pairs[token];
+			delete socket.token;
 			});
+			 */
+			delete pairs[token].socket;
+			delete socket.token;
 		} else {
 			delete pairs[token];
 			delete socket.token;
