@@ -1,4 +1,9 @@
 $(document).ready(function () {
+	if(window.location.protocol == "http:"){
+		window.location = "https:" + window.location.host;
+		return;
+	}
+	
 	$('#send').hide();
 	$('#sendForm').submit(function (e) {
 		e.preventDefault();
