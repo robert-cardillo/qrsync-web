@@ -9,7 +9,7 @@ $(document).ready(function () {
 		}
 	});
 
-	var socket = io('//:8000');
+	var socket = io('//:8443');
 	socket.on('qr', function (data) {
 		$('#qrcode').html('');
 		var qrcode = new QRCode('qrcode', {

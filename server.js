@@ -9,7 +9,7 @@ var API_KEY = process.env.API_KEY || fs.readFileSync('api.key').toString();
 var gcm = require('node-gcm');
 var sender = new gcm.Sender(API_KEY);
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8443;
 var ip = process.env.OPENSHIFT_NODEJS_IP || '192.168.137.1';
 var pairs = {};
 
