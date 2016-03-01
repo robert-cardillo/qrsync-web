@@ -120,7 +120,7 @@ app.get('/s', function (req, res) {
 		}, function (err, response) {});
 		res.send("");
 	} else {
-		res.send("alert('QRSync: Please pair your device and your browser first.')");
+		res.send("alert('QRSync: Please pair your device and your browser first.'); window.open('https://qrsync-bulut.rhcloud.com/','_blank');");
 	}
 });
 
