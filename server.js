@@ -1,4 +1,5 @@
 var express = require('express');
+var favicon = require('serve-favicon');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
@@ -14,6 +15,7 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8443;
 var ip = process.env.OPENSHIFT_NODEJS_IP || '192.168.137.1';
 var pairs = {};
 
+app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
