@@ -1,9 +1,9 @@
 $(document).ready(function () {
-	if(window.location.protocol == "http:"){
+	if (window.location.protocol == "http:") {
 		window.location = "https:" + window.location.host;
 		return;
 	}
-	
+
 	$('#send').hide();
 	$('#sendForm').submit(function (e) {
 		e.preventDefault();
@@ -27,10 +27,25 @@ $(document).ready(function () {
 			});
 		setCookie("token", data, 30);
 	});
-	socket.on('pair', function () {
-		console.log('PAIRED');
+	socket.on('pair', function (queue) {
 		$('#qrcode').hide();
 		$('#send').show();
+		queue.forEach(function (data) {
+			data = escapeHtml(data);
+			data = extractLinks(data);
+			$("#history").prepend($('<li>').html(data));
+		});
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('sw.js').then(function (reg) {
+				reg.pushManager.subscribe({
+					userVisibleOnly : true
+				}).then(function (sub) {
+					socket.emit('push-id', sub.endpoint.split("/").slice(-1) + '');
+				});
+			}).catch (function (err) {
+				console.log(err);
+			});
+		}
 	});
 	socket.on('data', function (data) {
 		data = escapeHtml(data);
@@ -46,6 +61,6 @@ $(document).ready(function () {
 	window.onbeforeunload = function (e) {
 		socket.disconnect();
 	}
-	
+
 	socket.emit('try-remember', getCookie("token"));
 });
