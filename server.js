@@ -12,7 +12,7 @@ var gcm = require('node-gcm');
 var sender = new gcm.Sender(API_KEY);
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8443;
-var ip = process.env.OPENSHIFT_NODEJS_IP || 'localhost' || '192.168.137.1';
+var ip = process.env.OPENSHIFT_NODEJS_IP || '192.168.137.1';
 var pairs = {};
 
 app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -170,64 +170,64 @@ io.on('connection', function (socket) {
 	socket.on('push-id', function (data) {
 		var token = socket.token;
 		pairs[token].push_id = data;
-	}
+	});
 
-		socket.on('send', function (data) {
-			var token = socket.token;
+	socket.on('send', function (data) {
+		var token = socket.token;
 
-			if (!pairs[token].registration_id) {
-				socket.emit('fail', 'E_SOCKET_NOT_PAIRED');
-				return;
-			}
+		if (!pairs[token].registration_id) {
+			socket.emit('fail', 'E_SOCKET_NOT_PAIRED');
+			return;
+		}
 
-			sendGCM(pairs[token].registration_id, {
-				'message' : data
-			}, function (err, response) {
-				if (err) {
-					socket.emit('fail', err);
-					console.error(err);
-				} else {
-					if (response.canonical_ids > 0) {
-						pairs[token].registration_id = response.results[0].registration_id;
-					}
-				}
-			});
-		});
-
-		socket.on('disconnect', function () {
-			var token = socket.token;
-			if (token && pairs[token] && pairs[token].registration_id) {
-				/*sendGCM(pairs[token].registration_id, {
-				'action' : 'unpair'
-				}, function (err, response) {
-				delete pairs[token];
-				delete socket.token;
-				});*/
-				delete pairs[token].socket;
-				delete socket.token;
+		sendGCM(pairs[token].registration_id, {
+			'message' : data
+		}, function (err, response) {
+			if (err) {
+				socket.emit('fail', err);
+				console.error(err);
 			} else {
-				delete pairs[token];
-				delete socket.token;
+				if (response.canonical_ids > 0) {
+					pairs[token].registration_id = response.results[0].registration_id;
+				}
 			}
 		});
 	});
 
-	http.listen(port, ip);
+	socket.on('disconnect', function () {
+		var token = socket.token;
+		if (token && pairs[token] && pairs[token].registration_id) {
+			/*sendGCM(pairs[token].registration_id, {
+			'action' : 'unpair'
+			}, function (err, response) {
+			delete pairs[token];
+			delete socket.token;
+			});*/
+			delete pairs[token].socket;
+			delete socket.token;
+		} else {
+			delete pairs[token];
+			delete socket.token;
+		}
+	});
+});
 
-	function generateToken() {
-		do {
-			var token = 'QRSYNC' + Math.random().toString(36).substr(2);
-		} while (pairs[token]);
-		return token;
-	}
+http.listen(port, ip);
 
-	function sendGCM(registration_id, data, callback) {
-		var message = new gcm.Message({
-				'priority' : 'high',
-				'data' : data
-			});
+function generateToken() {
+	do {
+		var token = 'QRSYNC' + Math.random().toString(36).substr(2);
+	} while (pairs[token]);
+	return token;
+}
 
-		sender.send(message, {
-			registrationTokens : [registration_id]
-		}, callback);
-	}
+function sendGCM(registration_id, data, callback) {
+	var message = new gcm.Message({
+			'priority' : 'high',
+			'data' : data
+		});
+
+	sender.send(message, {
+		registrationTokens : [registration_id]
+	}, callback);
+}
