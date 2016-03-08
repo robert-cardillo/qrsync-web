@@ -45,7 +45,7 @@ app.post('/pair', function (req, res) {
 		'status' : 'success'
 	});
 
-	pairs[token].socket.emit('pair', pairs[data].queue);
+	pairs[token].socket.emit('pair', pairs[token].queue);
 });
 
 app.post('/unpair', function (req, res) {
