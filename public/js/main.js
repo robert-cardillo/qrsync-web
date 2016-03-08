@@ -46,6 +46,7 @@ $(document).ready(function () {
 				console.log(err);
 			});
 		}
+		Notification.requestPermission();
 	});
 	socket.on('data', function (data) {
 		data = escapeHtml(data);
