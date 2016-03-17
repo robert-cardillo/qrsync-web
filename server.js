@@ -145,7 +145,8 @@ app.get('/s', function (req, res) {
 		});
 		res.send("");
 	} else {
-		res.send("(function(){var s=document.createElement('SCRIPT');s.type='text/javascript';s.src='https://qrsync-bulut.rhcloud.com/js/popup.js?r='+Math.random();document.getElementsByTagName('head')[0].appendChild(s)})()");
+		//res.send("(function(){var s=document.createElement('SCRIPT');s.type='text/javascript';s.src='https://qrsync-bulut.rhcloud.com/js/popup.js?r='+Math.random();document.getElementsByTagName('head')[0].appendChild(s)})()");
+		res.send("alert('QRSync: Please pair your device and your browser first.'); window.open('https://qrsync-bulut.rhcloud.com/','_blank');");
 	}
 });
 
